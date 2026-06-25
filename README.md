@@ -1,2 +1,197 @@
 # aseel-rooster-farm
 Premium Quality Aseel Birds and Roosters in PakistanSSs
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aseel Rooster Farm</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#f4f4f4}
+header{background:#7b0000;color:#fff;text-align:center;padding:20px;position:sticky;top:0}
+.hero{background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),url('https://images.unsplash.com/photo-1548550023-2bdb3c5beed7') center/cover;height:55vh;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center}
+.btn{display:inline-block;padding:10px 16px;margin:5px;border-radius:6px;text-decoration:none;color:#fff}
+.call{background:green}.wa{background:#25D366}
+.login{background:#222}
+.admin{display:none;max-width:800px;margin:20px auto;background:#fff;padding:20px;border-radius:10px}
+input,select{width:100%;padding:10px;margin:8px 0}
+button{padding:10px 14px;border:none;border-radius:6px;cursor:pointer}
+.add{background:green;color:#fff;width:100%}
+.container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px}
+.card{width:300px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.card img{width:100%;height:220px;object-fit:cover}
+.card h3,.card p,.price,.actions{padding:10px}
+.price{font-weight:bold;color:green}
+.actions button{margin-right:5px}
+.buy{background:#25D366;color:#fff}
+.edit{background:#007bff;color:#fff}
+.delete{background:#c00000;color:#fff}
+.badge{display:inline-block;padding:4px 8px;border-radius:20px;color:#fff;font-size:12px;margin-left:10px}
+.available{background:green}.sold{background:#c00000}
+.search-wrap{max-width:800px;margin:15px auto;padding:0 15px}
+footer{background:#222;color:#fff;text-align:center;padding:20px;margin-top:20px}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🐔 ASEEL ROOSTER FARM</h1>
+<p>Premium Quality Pure Aseel Birds</p>
+<a href="tel:+923184351602" class="btn call">Call</a>
+<a href="https://wa.me/923184351602" class="btn wa">WhatsApp</a>
+<button class="btn login" onclick="adminLogin()">Admin Login</button>
+<button class="btn login" onclick="logout()">Logout</button>
+</header>
+
+<section class="hero">
+<div>
+<h1>Pure Aseel Bloodline</h1>
+<p>Healthy • Strong • High Quality Birds</p>
+</div>
+</section>
+
+<div class="admin" id="adminPanel">
+<h2>Add / Manage Bird</h2>
+<input id="name" placeholder="Bird Name">
+<input id="breed" placeholder="Breed">
+<input id="price" type="number" placeholder="Price">
+<select id="status">
+<option>Available</option>
+<option>Sold</option>
+</select>
+<input id="image" type="file">
+<button class="add" onclick="addBird()">Add Bird</button>
+</div>
+
+<div class="search-wrap">
+<input id="search" placeholder="Search birds..." onkeyup="showBirds()">
+</div>
+
+<div class="container" id="container"></div>
+
+<footer>
+<p>📞 03184351602</p>
+<p>Pakistan</p>
+</footer>
+
+<script>
+let isAdmin=false;
+let birds=JSON.parse(localStorage.getItem("birds"))||[];
+
+function saveData(){
+ localStorage.setItem("birds",JSON.stringify(birds));
+}
+
+function adminLogin(){
+ let p=prompt("Enter Admin Password");
+ if(p==="0056"){
+   isAdmin=true;
+   document.getElementById("adminPanel").style.display="block";
+   showBirds();
+   alert("Admin Mode Enabled");
+ }else{
+   alert("Wrong Password");
+ }
+}
+
+function logout(){
+ isAdmin=false;
+ document.getElementById("adminPanel").style.display="none";
+ showBirds();
+}
+
+function addBird(){
+ let name=nameEl.value.trim();
+ let breed=breedEl.value.trim();
+ let price=priceEl.value;
+ let status=statusEl.value;
+ let file=imageEl.files[0];
+
+ if(!name||!breed||!price||!file){
+   alert("Fill all fields");
+   return;
+ }
+
+ let reader=new FileReader();
+ reader.onload=function(){
+   birds.push({
+     id:Date.now(),
+     name,breed,price,status,
+     image:reader.result
+   });
+   saveData();
+   showBirds();
+   nameEl.value="";
+   breedEl.value="";
+   priceEl.value="";
+   imageEl.value="";
+ };
+ reader.readAsDataURL(file);
+}
+
+function deleteBird(index){
+ if(confirm("Delete this bird?")){
+   birds.splice(index,1);
+   saveData();
+   showBirds();
+ }
+}
+
+function editBird(index){
+ let b=birds[index];
+ let n=prompt("Bird Name",b.name);
+ let br=prompt("Breed",b.breed);
+ let pr=prompt("Price",b.price);
+ let st=prompt("Status (Available/Sold)",b.status);
+
+ if(n && br && pr){
+   b.name=n;
+   b.breed=br;
+   b.price=pr;
+   b.status=st||b.status;
+   saveData();
+   showBirds();
+ }
+}
+
+function showBirds(){
+ const q=document.getElementById("search").value.toLowerCase();
+ const container=document.getElementById("container");
+ container.innerHTML="";
+
+ birds.forEach((bird,index)=>{
+   if(!(`${bird.name} ${bird.breed}`.toLowerCase()).includes(q)) return;
+
+   let badgeClass=bird.status==="Sold"?"sold":"available";
+
+   let actions=isAdmin
+   ? `<button class="edit" onclick="editBird(${index})">Edit</button>
+      <button class="delete" onclick="deleteBird(${index})">Delete</button>`
+   : `<a target="_blank" href="https://wa.me/923184351602?text=Hello, I want to buy ${encodeURIComponent(bird.name)}">
+        <button class="buy">Buy Now</button>
+      </a>`;
+
+   container.innerHTML += `
+   <div class="card">
+      <img src="${bird.image}">
+      <h3>${bird.name}
+      <span class="badge ${badgeClass}">${bird.status}</span></h3>
+      <p>Breed: ${bird.breed}</p>
+      <div class="price">Rs ${bird.price}</div>
+      <div class="actions">${actions}</div>
+   </div>`;
+ });
+}
+
+const nameEl=document.getElementById("name");
+const breedEl=document.getElementById("breed");
+const priceEl=document.getElementById("price");
+const statusEl=document.getElementById("status");
+const imageEl=document.getElementById("image");
+
+showBirds();
+</script>
+</body>
+</html>
+
